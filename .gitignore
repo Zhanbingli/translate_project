@@ -1,0 +1,44 @@
+# Node.js 依赖和日志
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# 编译输出文件
+dist/
+build/
+
+# 开发者工具
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# 密钥和敏感信息
+*.pem
+*.crx
+api_keys.json
+credentials.json
+secrets.json
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+*.zip
+
+# Chrome扩展打包文件
+*.zip
+*.crx
+
+# 本地配置文件
+.env
+.env.local 

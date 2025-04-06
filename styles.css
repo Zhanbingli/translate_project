@@ -1,0 +1,626 @@
+/* 全局样式 */
+:root {
+    --primary-color: #4285f4;
+    --secondary-color: #0f9d58;
+    --danger-color: #ea4335;
+    --text-color: #333;
+    --light-gray: #f5f5f5;
+    --border-color: #ddd;
+    --hover-bg: #f0f0f0;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: var(--text-color);
+    background-color: #fff;
+    width: 400px;
+    max-height: 600px;
+    overflow-x: hidden;
+}
+
+/* 容器 */
+.container {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* 标题栏 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.header-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-button:hover {
+    background-color: var(--hover-bg);
+    color: var(--primary-color);
+}
+
+/* 搜索栏 */
+.search-bar {
+    display: flex;
+    margin-bottom: 16px;
+    gap: 8px;
+}
+
+#searchInput {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.buttons-container {
+    display: flex;
+    gap: 8px;
+}
+
+.action-button {
+    padding: 8px 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.action-button:hover {
+    opacity: 0.9;
+}
+
+/* 加载指示器 */
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 没有单词的提示 */
+.no-words-message {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* 单词列表 */
+.word-list {
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+/* 单词项 */
+.word-item {
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    transition: background-color 0.2s;
+}
+
+.word-item:hover {
+    background-color: var(--light-gray);
+}
+
+.word-box {
+    flex: 1;
+}
+
+.word-text {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.word-details {
+    display: flex;
+    font-size: 12px;
+    color: #666;
+    gap: 12px;
+}
+
+.word-date {
+    white-space: nowrap;
+}
+
+.word-source {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.action-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    min-width: 100px;
+}
+
+.translation-box {
+    max-width: 220px;
+    overflow: hidden;
+}
+
+.translation {
+    font-size: 13px;
+    color: #444;
+    overflow-wrap: break-word;
+}
+
+.translate-button {
+    padding: 4px 8px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.translate-button:hover {
+    opacity: 0.9;
+}
+
+.translate-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.buttons-box {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.delete-button {
+    width: 20px;
+    height: 20px;
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    line-height: 1;
+}
+
+.delete-button:hover {
+    opacity: 0.9;
+}
+
+/* 工具提示样式 (content.js) */
+#wordsaver-tooltip {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.tooltip-actions {
+    margin-top: 10px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+}
+
+/* 悬停控制区域样式 */
+#wordsaver-hover-control {
+    z-index: 9999 !important;
+}
+
+#wordsaver-hover-toggle {
+    cursor: pointer !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+}
+
+#wordsaver-hover-menu {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+    z-index: 10000 !important;
+}
+
+.wordsaver-menu-item {
+    cursor: pointer !important;
+    user-select: none !important;
+}
+
+.wordsaver-menu-item:hover {
+    background-color: #f5f5f5 !important;
+}
+
+.wordsaver-highlight {
+    background-color: rgba(255, 255, 0, 0.3) !important;
+    border-radius: 2px !important;
+}
+
+/* 通知样式 */
+.wordsaver-notification {
+    position: fixed !important;
+    bottom: 70px !important;
+    right: 20px !important;
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    color: white !important;
+    padding: 10px 15px !important;
+    border-radius: 4px !important;
+    z-index: 99999 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 14px !important;
+    max-width: 250px !important;
+}
+
+/* 复习按钮样式 */
+.review-btn {
+    padding: 8px 12px;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.review-btn:hover {
+    opacity: 0.9;
+}
+
+.review-btn.active {
+    background-color: var(--danger-color);
+}
+
+.review-container {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 复习模式界面 */
+.review-container {
+    width: 100%;
+    padding: 16px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.review-progress {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.progress-bar {
+    height: 6px;
+    background-color: var(--light-gray);
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    background-color: var(--primary-color);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.review-word {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.review-word h2 {
+    font-size: 24px;
+    color: var(--primary-color);
+}
+
+.review-translation {
+    padding: 16px;
+    background-color: var(--light-gray);
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.review-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.show-translation-btn {
+    padding: 8px 16px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.show-translation-btn:hover {
+    opacity: 0.9;
+}
+
+.memory-rating {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.memory-rating p {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #555;
+}
+
+.rating-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.rating-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s;
+}
+
+.rating-btn[data-rating="1"] {
+    background-color: #ea4335;
+    color: white;
+}
+
+.rating-btn[data-rating="2"] {
+    background-color: #fbbc05;
+    color: white;
+}
+
+.rating-btn[data-rating="3"] {
+    background-color: #4285f4;
+    color: white;
+}
+
+.rating-btn[data-rating="4"] {
+    background-color: #0f9d58;
+    color: white;
+}
+
+.rating-btn:hover {
+    opacity: 0.9;
+}
+
+.review-complete {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.review-complete h3 {
+    color: var(--primary-color);
+    font-size: 20px;
+    margin-bottom: 12px;
+}
+
+.review-complete p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* 翻译结果样式 */
+.full-translation {
+    padding: 15px;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    margin-top: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.translation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.word-text-big {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.speak-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.chinese-translation {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 17px;
+    line-height: 1.5;
+    color: #222;
+    font-weight: 500;
+}
+
+.english-definitions {
+    font-size: 15px;
+    color: #333;
+}
+
+.definition-group {
+    margin-bottom: 12px;
+}
+
+.part-of-speech {
+    font-size: 13px;
+    color: #555;
+    font-style: italic;
+    margin-bottom: 4px;
+}
+
+.definition {
+    line-height: 1.5;
+    font-size: 15px;
+}
+
+.example {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #555;
+    font-style: italic;
+}
+
+.translation-links {
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.translation-links a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.translation-links a:hover {
+    text-decoration: underline;
+}
+
+/* 危险按钮样式 */
+.danger-button {
+    background-color: var(--danger-color);
+}
+
+/* 特性容器样式 */
+.features-container {
+    margin-bottom: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.feature-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* 开关按钮样式 */
+.toggle-switch {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.toggle-slider {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+    margin-right: 8px;
+    transition: .4s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.toggle-label {
+    font-size: 14px;
+    color: var(--text-color);
+}
