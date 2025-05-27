@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordSaver - 改进版</title>
+    <link rel="stylesheet" href="improved-styles.css">
+</head>
+<body>
+    <div class="popup-container">
+        <!-- 头部 -->
+        <div class="popup-header">
+            <h1 class="popup-title">
+                📚 WordSaver
+            </h1>
+            <p class="popup-subtitle">智能单词学习助手</p>
+        </div>
+
+        <!-- 搜索区域 -->
+        <div class="search-container">
+            <input 
+                type="text" 
+                id="search-input" 
+                class="search-input" 
+                placeholder="搜索已保存的单词..."
+                autocomplete="off"
+            >
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="stats-container">
+            <div class="stat-item">
+                <span id="total-words">0</span> 个单词
+            </div>
+            <div class="stat-item">
+                <span id="today-reviewed">0</span> 今日复习
+            </div>
+            <div class="stat-item">
+                <span id="accuracy-rate">0%</span> 准确率
+            </div>
+        </div>
+
+        <!-- 快速操作标签 -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="words">单词列表</button>
+                <button class="tab-btn" data-tab="review">待复习</button>
+                <button class="tab-btn" data-tab="test">测试</button>
+                <button class="tab-btn" data-tab="stats">统计</button>
+            </div>
+        </div>
+
+        <!-- 单词列表标签页 -->
+        <div id="words-tab" class="tab-content active">
+            <div class="word-list-container" id="word-list">
+                <div class="loading-indicator" id="loading">
+                    <div class="spinner"></div>
+                    <span>加载中...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 待复习标签页 -->
+        <div id="review-tab" class="tab-content">
+            <div class="review-info">
+                <div class="review-stats">
+                    <div class="review-count">
+                        <span class="review-number" id="review-count">0</span>
+                        <span class="review-label">个单词待复习</span>
+                    </div>
+                    <div class="urgency-levels">
+                        <div class="urgency urgent">
+                            <span class="dot"></span>
+                            <span id="urgent-count">0</span> 逾期
+                        </div>
+                        <div class="urgency due">
+                            <span class="dot"></span>
+                            <span id="due-count">0</span> 今日
+                        </div>
+                        <div class="urgency upcoming">
+                            <span class="dot"></span>
+                            <span id="upcoming-count">0</span> 即将
+                        </div>
+                    </div>
+                </div>
+                <button id="start-review-btn" class="btn btn-primary">开始复习</button>
+            </div>
+            <div class="word-list-container" id="review-list"></div>
+        </div>
+
+        <!-- 测试标签页 -->
+        <div id="test-tab" class="tab-content">
+            <div class="test-setup">
+                <h3>选择测试类型</h3>
+                <div class="test-options">
+                    <label class="option-card">
+                        <input type="radio" name="test-type" value="multiple_choice" checked>
+                        <div class="option-content">
+                            <div class="option-icon">📝</div>
+                            <div class="option-text">选择题</div>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="test-type" value="fill_blank">
+                        <div class="option-content">
+                            <div class="option-icon">✏️</div>
+                            <div class="option-text">填空题</div>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="test-type" value="translation">
+                        <div class="option-content">
+                            <div class="option-icon">🔄</div>
+                            <div class="option-text">翻译题</div>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="test-type" value="mixed">
+                        <div class="option-content">
+                            <div class="option-icon">🎯</div>
+                            <div class="option-text">混合题型</div>
+                        </div>
+                    </label>
+                </div>
+                <div class="test-count">
+                    <label for="test-count-input">题目数量：</label>
+                    <select id="test-count-input">
+                        <option value="5">5题</option>
+                        <option value="10" selected>10题</option>
+                        <option value="15">15题</option>
+                        <option value="20">20题</option>
+                    </select>
+                </div>
+                <button id="start-test-btn" class="btn btn-primary">开始测试</button>
+            </div>
+            <div id="test-content" class="test-content" style="display: none;">
+                <!-- 测试内容将在这里动态生成 -->
+            </div>
+        </div>
+
+        <!-- 统计标签页 -->
+        <div id="stats-tab" class="tab-content">
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-reviews">0</div>
+                    <div class="stat-label">总复习次数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="current-streak">0</div>
+                    <div class="stat-label">连续学习天数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="max-streak">0</div>
+                    <div class="stat-label">最长连续天数</div>
+                </div>
+            </div>
+            
+            <div class="weekly-chart">
+                <h3>本周学习情况</h3>
+                <div class="chart-container" id="weekly-chart">
+                    <!-- 图表将在这里动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部操作栏 -->
+        <div class="bottom-actions">
+            <button id="import-btn" class="btn btn-secondary">
+                📥 导入
+            </button>
+            <button id="export-btn" class="btn btn-secondary">
+                📤 导出
+            </button>
+            <button id="settings-btn" class="btn btn-secondary">
+                ⚙️ 设置
+            </button>
+        </div>
+    </div>
+
+    <script type="module" src="improved-popup.js"></script>
+</body>
+</html> 

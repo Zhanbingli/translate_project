@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordSaver 插件调试工具</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #4285f4;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .status-check {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .check-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        
+        .check-ok {
+            background: #e8f5e8;
+            color: #0f9d58;
+        }
+        
+        .check-error {
+            background: #fce8e6;
+            color: #d32f2f;
+        }
+        
+        .check-warning {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+        
+        .icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .test-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .test-word {
+            background: #2196f3;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: inline-block;
+            margin: 5px;
+            font-weight: bold;
+        }
+        
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #3367d6;
+        }
+        
+        .log-section {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .instructions {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 WordSaver 插件调试工具</h1>
+        
+        <div class="instructions">
+            <h3>📋 使用说明：</h3>
+            <ol>
+                <li>确保 WordSaver 插件已在浏览器中安装并启用</li>
+                <li>点击下方"检查插件状态"按钮</li>
+                <li>将鼠标悬停在蓝色测试单词上</li>
+                <li>查看控制台日志了解详细信息</li>
+            </ol>
+        </div>
+
+        <div class="status-check">
+            <h3>🔍 插件状态检查</h3>
+            <button onclick="checkExtensionStatus()">检查插件状态</button>
+            <div id="status-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 悬停翻译测试</h3>
+            <p>将鼠标悬停在下面的单词上测试翻译功能：</p>
+            <div>
+                <span class="test-word">hello</span>
+                <span class="test-word">beautiful</span>
+                <span class="test-word">technology</span>
+                <span class="test-word">amazing</span>
+                <span class="test-word">intelligence</span>
+            </div>
+            <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                💡 如果看到翻译弹窗，说明插件正常工作
+            </p>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 插件控制面板</h3>
+            <p>查看页面右下角是否有蓝色的"W"按钮</p>
+            <button onclick="highlightControlArea()">高亮控制面板</button>
+            <button onclick="showControlInfo()">显示控制面板信息</button>
+        </div>
+
+        <div class="log-section">
+            <h4>📝 调试日志:</h4>
+            <div id="debug-log"></div>
+        </div>
+
+        <div class="status-check">
+            <h3>🛠️ 常见问题解决</h3>
+            <button onclick="reloadExtension()">重新加载扩展</button>
+            <button onclick="clearStorage()">清除存储数据</button>
+            <button onclick="testPopup()">测试弹窗</button>
+            <button onclick="showTroubleshooting()">显示故障排除指南</button>
+        </div>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('debug-log');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#333',
+                success: '#0f9d58',
+                error: '#d32f2f',
+                warning: '#ff9800'
+            };
+            
+            logElement.innerHTML += `
+                <div style="color: ${colors[type]}; margin-bottom: 5px;">
+                    [${timestamp}] ${message}
+                </div>
+            `;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function checkExtensionStatus() {
+            log('开始检查插件状态...', 'info');
+            const resultsDiv = document.getElementById('status-results');
+            resultsDiv.innerHTML = '';
+            
+            const checks = [
+                {
+                    name: '检查 Chrome 扩展 API',
+                    check: () => typeof chrome !== 'undefined' && chrome.runtime,
+                    fix: '请确保在 Chrome 浏览器中打开此页面'
+                },
+                {
+                    name: '检查内容脚本元素',
+                    check: () => document.getElementById('wordsaver-hover-control'),
+                    fix: '插件可能未正确加载，请刷新页面或重新安装插件'
+                },
+                {
+                    name: '检查工具提示元素',
+                    check: () => document.getElementById('wordsaver-tooltip'),
+                    fix: '内容脚本可能未完全初始化'
+                },
+                {
+                    name: '检查扩展通信',
+                    check: () => {
+                        if (typeof chrome !== 'undefined' && chrome.runtime) {
+                            try {
+                                chrome.runtime.sendMessage({action: 'ping'}, (response) => {
+                                    log(`扩展响应: ${JSON.stringify(response)}`, 'success');
+                                });
+                                return true;
+                            } catch (e) {
+                                log(`扩展通信错误: ${e.message}`, 'error');
+                                return false;
+                            }
+                        }
+                        return false;
+                    },
+                    fix: '扩展后台脚本可能未运行，请检查扩展管理页面'
+                }
+            ];
+            
+            checks.forEach(check => {
+                const result = check.check();
+                const status = result ? 'check-ok' : 'check-error';
+                const icon = result ? '✅' : '❌';
+                
+                resultsDiv.innerHTML += `
+                    <div class="check-item ${status}">
+                        <span class="icon">${icon}</span>
+                        <div>
+                            <strong>${check.name}</strong>
+                            ${!result ? `<br><small>解决方案: ${check.fix}</small>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                log(`${check.name}: ${result ? '通过' : '失败'}`, result ? 'success' : 'error');
+            });
+        }
+
+        function highlightControlArea() {
+            const controlArea = document.getElementById('wordsaver-hover-control');
+            if (controlArea) {
+                controlArea.style.border = '3px solid red';
+                controlArea.style.animation = 'pulse 1s infinite';
+                log('控制面板已高亮显示', 'success');
+                
+                setTimeout(() => {
+                    controlArea.style.border = '';
+                    controlArea.style.animation = '';
+                }, 3000);
+            } else {
+                log('未找到控制面板元素', 'error');
+            }
+        }
+
+        function showControlInfo() {
+            const controlArea = document.getElementById('wordsaver-hover-control');
+            if (controlArea) {
+                const rect = controlArea.getBoundingClientRect();
+                log(`控制面板位置: x=${rect.left}, y=${rect.top}, 可见=${controlArea.style.display !== 'none'}`, 'info');
+            } else {
+                log('控制面板不存在 - 插件可能未加载', 'error');
+            }
+        }
+
+        function reloadExtension() {
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                chrome.runtime.reload();
+                log('正在重新加载扩展...', 'warning');
+            } else {
+                log('无法重新加载扩展 - Chrome API 不可用', 'error');
+            }
+        }
+
+        function clearStorage() {
+            if (typeof chrome !== 'undefined' && chrome.storage) {
+                chrome.storage.local.clear(() => {
+                    log('扩展存储数据已清除', 'warning');
+                });
+            } else {
+                log('无法清除存储 - Chrome Storage API 不可用', 'error');
+            }
+        }
+
+        function testPopup() {
+            if (typeof chrome !== 'undefined' && chrome.action) {
+                chrome.action.openPopup();
+                log('尝试打开扩展弹窗', 'info');
+            } else {
+                log('无法测试弹窗 - Chrome Action API 不可用', 'error');
+            }
+        }
+
+        function showTroubleshooting() {
+            const troubleshooting = `
+1. 确认插件已安装：
+   - 打开 chrome://extensions/
+   - 确认 WordSaver 插件已启用
+   - 检查是否有错误信息
+
+2. 刷新页面：
+   - 按 F5 或 Ctrl+R 刷新当前页面
+   - 确保内容脚本重新加载
+
+3. 检查权限：
+   - 确认插件有访问当前网站的权限
+   - 检查是否被广告拦截器阻止
+
+4. 查看控制台：
+   - 按 F12 打开开发者工具
+   - 查看 Console 标签中的错误信息
+
+5. 重新安装：
+   - 卸载当前插件
+   - 重新安装最新版本
+            `;
+            
+            alert(troubleshooting);
+            log('已显示故障排除指南', 'info');
+        }
+
+        // 页面加载时自动检查
+        window.addEventListener('load', () => {
+            log('调试工具已加载', 'success');
+            setTimeout(checkExtensionStatus, 1000);
+        });
+
+        // 监听控制台错误
+        window.addEventListener('error', (e) => {
+            log(`JavaScript错误: ${e.message}`, 'error');
+        });
+    </script>
+</body>
+</html> 

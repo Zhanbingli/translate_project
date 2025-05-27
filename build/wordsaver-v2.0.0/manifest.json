@@ -1,0 +1,50 @@
+{
+    "manifest_version": 3,
+    "name": "WordSaver - Smart Vocabulary Builder",
+    "version": "2.0.0",
+    "description": "智能英语单词学习助手：悬停翻译、科学复习、记忆曲线管理。帮助您高效学习和记忆英语单词。",
+    "icons": {
+        "16": "icon.svg",
+        "48": "icon.svg",
+        "128": "icon.svg"
+    },
+    "permissions": [
+        "storage", 
+        "contextMenus", 
+        "activeTab"
+    ],
+    "host_permissions": [
+        "https://api.dictionaryapi.dev/*", 
+        "https://generativelanguage.googleapis.com/*", 
+        "https://translate.google.com/*",
+        "https://translate.googleapis.com/*",
+        "https://dictionary.cambridge.org/*",
+        "https://www.oxfordlearnersdictionaries.com/*"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"],
+            "run_at": "document_end"
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "WordSaver - 智能单词学习",
+        "default_icon": {
+            "16": "icon.svg",
+            "48": "icon.svg",
+            "128": "icon.svg"
+        }
+    },
+    "options_page": "options.html",
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    },
+    "author": "WordSaver Team",
+    "homepage_url": "https://github.com/your-username/word_saver_extension"
+}

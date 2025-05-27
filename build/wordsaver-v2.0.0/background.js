@@ -103,48 +103,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ success: true, action: "pong" });
         return true;
     }
-    else if (message.action === "deleteWord") {
-        const word = message.word?.trim();
-        if (!word) {
-            sendResponse({ error: "无效的单词" });
-            return true;
-        }
-        
-        console.log(`接收到删除单词请求: "${word}"`);
-        
-        deleteWordFromStorage(word, function(success) {
-            if (success) {
-                console.log(`单词删除成功: ${word}`);
-                sendResponse({ success: true });
-            } else {
-                console.error(`单词删除失败: ${word}`);
-                sendResponse({ error: "删除失败" });
-            }
-        });
-        
-        return true;
-    }
-    else if (message.action === "getTranslation") {
-        const word = message.word?.trim();
-        if (!word) {
-            sendResponse({ error: "无效的单词" });
-            return true;
-        }
-        
-        console.log(`接收到翻译请求: "${word}"`);
-        
-        fetchChineseTranslation(word, function(translation) {
-            if (translation) {
-                console.log(`翻译成功: ${word} -> ${translation}`);
-                sendResponse({ success: true, translation: translation });
-            } else {
-                console.error(`翻译失败: ${word}`);
-                sendResponse({ error: "翻译失败" });
-            }
-        });
-        
-        return true;
-    }
     return false;
 });
 
@@ -290,78 +248,73 @@ function fallbackToDirectLink(word, callback) {
 
 // 统一的保存单词函数
 function saveWordToStorage(word, translation, pageUrl, pageTitle, callback) {
-    chrome.storage.local.get(['words', 'translations'], function(result) {
-        const words = result.words || [];
-        const translations = result.translations || {};
-        
-        // 检查是否已经存在
-        const existingWordIndex = words.findIndex(item => item.word === word);
-        const exists = existingWordIndex !== -1;
-        
-        if (exists) {
-            console.log(`单词 "${word}" 已存在，更新翻译`);
-        } else {
-            // 添加新单词到数组
-            words.push({
-                word: word,
-                timestamp: Date.now(),
-                source: {
-                    url: pageUrl,
-                    title: pageTitle
-                }
-            });
-            console.log(`添加新单词到存储: ${word}`);
+    if (!word) {
+        console.error("尝试保存空单词");
+        if (callback) callback(false);
+        return;
+    }
+    
+    // 格式化数据
+    const timestamp = new Date().getTime();
+    const wordData = {
+        word: word,
+        timestamp: timestamp,
+        date: new Date().toLocaleDateString(),
+        source: {
+            url: pageUrl || "",
+            title: pageTitle || pageUrl || "未知来源"
         }
-        
-        // 保存或更新翻译
-        translations[word] = translation;
-        
-        // 保存到存储
-        chrome.storage.local.set({
-            words: words,
-            translations: translations
-        }, function() {
-            if (chrome.runtime.lastError) {
-                console.error("保存单词失败:", chrome.runtime.lastError);
-                callback(false, exists);
-            } else {
-                console.log(`单词 "${word}" 保存成功`);
-                callback(true, exists);
-            }
-        });
-    });
-}
-
-// 从存储中删除单词
-function deleteWordFromStorage(word, callback) {
-    chrome.storage.local.get(['words', 'translations'], function(result) {
-        const words = result.words || [];
-        const translations = result.translations || {};
-        
-        // 检查单词是否存在
-        const existingWordIndex = words.findIndex(item => item.word === word);
-        if (existingWordIndex === -1) {
-            console.log(`单词 "${word}" 不存在`);
-            callback(false);
+    };
+    
+    console.log(`准备保存单词: `, wordData);
+    
+    // 保存到存储
+    chrome.storage.local.get({words: [], translations: {}}, function(items) {
+        if (chrome.runtime.lastError) {
+            console.error("获取存储数据失败:", chrome.runtime.lastError);
+            if (callback) callback(false);
             return;
         }
         
-        // 删除单词
-        words.splice(existingWordIndex, 1);
-        delete translations[word];
+        // 检查单词是否已存在
+        const existingWordIndex = items.words.findIndex(item => 
+            item.word.toLowerCase() === word.toLowerCase()
+        );
         
-        // 保存更新后的数据
+        let exists = false;
+        
+        // 如果存在，则更新时间戳和来源
+        if (existingWordIndex !== -1) {
+            exists = true;
+            items.words[existingWordIndex].timestamp = timestamp;
+            items.words[existingWordIndex].date = wordData.date;
+            items.words[existingWordIndex].source = wordData.source;
+            console.log(`更新现有单词: ${word}`);
+        } else {
+            // 否则添加新单词
+            items.words.push(wordData);
+            console.log(`添加新单词: ${word}`);
+        }
+        
+        // 保存翻译（如果有）
+        if (translation) {
+            items.translations[word] = translation;
+            console.log(`保存翻译: ${translation}`);
+        }
+        
+        // 更新存储
         chrome.storage.local.set({
-            words: words,
-            translations: translations
+            words: items.words,
+            translations: items.translations
         }, function() {
             if (chrome.runtime.lastError) {
-                console.error("删除单词失败:", chrome.runtime.lastError);
-                callback(false);
-            } else {
-                console.log(`单词 "${word}" 删除成功`);
-                callback(true);
+                console.error("保存到存储失败:", chrome.runtime.lastError);
+                if (callback) callback(false);
+                return;
             }
+            
+            console.log(`已保存单词: ${word}`);
+            if (callback) callback(true, exists);
         });
     });
 }

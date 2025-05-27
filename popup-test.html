@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordSaver 弹窗测试</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 测试环境样式 */
+        body {
+            background: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .test-wrapper {
+            border: 2px solid #ccc;
+            border-radius: 12px;
+            padding: 10px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .test-info {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-wrapper">
+        <div class="test-info">
+            弹窗尺寸测试 - 380x500px (最大高度)
+        </div>
+        
+        <div class="container">
+            <!-- 头部 -->
+            <header class="header">
+                <h1>WordSaver</h1>
+                <div id="word-count" class="word-count">共 5 个单词</div>
+            </header>
+
+            <!-- 搜索栏 -->
+            <div class="search-section">
+                <input type="text" id="search-input" placeholder="搜索单词或翻译..." class="search-input">
+            </div>
+
+            <!-- 消息显示 -->
+            <div id="message" class="message" style="display: none;"></div>
+
+            <!-- 单词列表 -->
+            <div class="words-section">
+                <div id="words-list" class="words-list">
+                    <!-- 模拟单词数据 -->
+                    <div class="word-item">
+                        <div class="word-header">
+                            <span class="word-text">hello</span>
+                            <button class="delete-btn">删除</button>
+                        </div>
+                        <div class="word-translation">你好；哈喽</div>
+                        <div class="word-info">
+                            <span class="word-date">2024-1-15</span>
+                            <span class="word-source">example.com</span>
+                        </div>
+                    </div>
+                    
+                    <div class="word-item">
+                        <div class="word-header">
+                            <span class="word-text">world</span>
+                            <button class="delete-btn">删除</button>
+                        </div>
+                        <div class="word-translation">世界；全球</div>
+                        <div class="word-info">
+                            <span class="word-date">2024-1-15</span>
+                            <span class="word-source">example.com</span>
+                        </div>
+                    </div>
+                    
+                    <div class="word-item">
+                        <div class="word-header">
+                            <span class="word-text">extension</span>
+                            <button class="delete-btn">删除</button>
+                        </div>
+                        <div class="word-translation">扩展；延伸</div>
+                        <div class="word-info">
+                            <span class="word-date">2024-1-15</span>
+                            <span class="word-source">chrome.google.com</span>
+                        </div>
+                    </div>
+                    
+                    <div class="word-item">
+                        <div class="word-header">
+                            <span class="word-text">beautiful</span>
+                            <button class="delete-btn">删除</button>
+                        </div>
+                        <div class="word-translation">美丽的；漂亮的</div>
+                        <div class="word-info">
+                            <span class="word-date">2024-1-14</span>
+                            <span class="word-source">test.com</span>
+                        </div>
+                    </div>
+                    
+                    <div class="word-item">
+                        <div class="word-header">
+                            <span class="word-text">translate</span>
+                            <button class="delete-btn">删除</button>
+                        </div>
+                        <div class="word-translation">翻译；转换</div>
+                        <div class="word-info">
+                            <span class="word-date">2024-1-14</span>
+                            <span class="word-source">dictionary.com</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部操作按钮 -->
+            <footer class="footer">
+                <button id="export-btn" class="action-button">导出CSV</button>
+                <button id="clear-btn" class="action-button danger">清空单词</button>
+            </footer>
+        </div>
+    </div>
+</body>
+</html> 

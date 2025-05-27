@@ -124,27 +124,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         
         return true;
     }
-    else if (message.action === "getTranslation") {
-        const word = message.word?.trim();
-        if (!word) {
-            sendResponse({ error: "无效的单词" });
-            return true;
-        }
-        
-        console.log(`接收到翻译请求: "${word}"`);
-        
-        fetchChineseTranslation(word, function(translation) {
-            if (translation) {
-                console.log(`翻译成功: ${word} -> ${translation}`);
-                sendResponse({ success: true, translation: translation });
-            } else {
-                console.error(`翻译失败: ${word}`);
-                sendResponse({ error: "翻译失败" });
-            }
-        });
-        
-        return true;
-    }
     return false;
 });
 

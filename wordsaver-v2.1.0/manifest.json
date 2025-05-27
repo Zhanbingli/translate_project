@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "WordSaver - 智能单词收集器",
-    "version": "2.1.2",
+    "version": "2.1.0",
     "description": "简单实用的英文单词收集工具。悬停翻译，一键保存，轻松管理单词列表。",
     "icons": {
         "16": "icon.svg",
