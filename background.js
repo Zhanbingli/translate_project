@@ -298,13 +298,20 @@ function saveWordToStorage(word, translation, pageUrl, pageTitle, callback) {
         const existingWordIndex = words.findIndex(item => item.word === word);
         const exists = existingWordIndex !== -1;
         
+        const timestamp = Date.now();
+        const date = new Date().toLocaleDateString();
+        
         if (exists) {
             console.log(`单词 "${word}" 已存在，更新翻译`);
+            // 更新时间戳和日期
+            words[existingWordIndex].timestamp = timestamp;
+            words[existingWordIndex].date = date;
         } else {
             // 添加新单词到数组
             words.push({
                 word: word,
-                timestamp: Date.now(),
+                timestamp: timestamp,
+                date: date,
                 source: {
                     url: pageUrl,
                     title: pageTitle

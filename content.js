@@ -2,7 +2,6 @@
 // 修复快捷键功能和翻译质量问题
 
 console.log("WordSaver 插件已加载！");
-chrome.runtime.sendMessage({ action: "contentScriptLoaded" });
 
 // 用户偏好设置
 let isHoverTranslateEnabled = false; // 默认关闭自动悬停翻译
@@ -207,9 +206,54 @@ document.addEventListener('mousemove', function(e) {
     }, hoverDelay);
 });
 
-// 处理鼠标位置的单词
+// 检查扩展上下文是否有效
+function isExtensionContextValid() {
+    try {
+        return chrome.runtime && chrome.runtime.id;
+    } catch (error) {
+        return false;
+    }
+}
+
+// 安全发送消息给background script
+function safeRuntimeSendMessage(message, callback) {
+    if (!isExtensionContextValid()) {
+        console.warn('扩展上下文已失效，请刷新页面');
+        showStatus('⚠️ 扩展需要刷新\n请刷新页面后重试', 5000);
+        return false;
+    }
+    
+    try {
+        chrome.runtime.sendMessage(message, function(response) {
+            if (chrome.runtime.lastError) {
+                if (chrome.runtime.lastError.message.includes('context invalidated')) {
+                    console.warn('扩展上下文在通信过程中失效');
+                    showStatus('⚠️ 扩展连接中断\n请刷新页面', 5000);
+                } else {
+                    console.error('运行时错误:', chrome.runtime.lastError);
+                }
+                callback && callback(null);
+            } else {
+                callback && callback(response);
+            }
+        });
+        return true;
+    } catch (error) {
+        console.error('发送消息时出错:', error);
+        showStatus('❌ 通信错误\n请刷新页面', 3000);
+        return false;
+    }
+}
+
+// 处理鼠标位置的单词 - 添加上下文检测
 function processMousePosition(e) {
     try {
+        // 首先检查扩展上下文是否有效
+        if (!isExtensionContextValid()) {
+            console.warn('扩展上下文已失效，停止处理鼠标事件');
+            return;
+        }
+        
         // 获取鼠标位置的文本
         const range = document.caretRangeFromPoint(e.clientX, e.clientY);
         if (!range || range.startContainer.nodeType !== Node.TEXT_NODE) {
@@ -225,7 +269,7 @@ function processMousePosition(e) {
         if (!wordInfo || !isValidEnglishWord(wordInfo.word)) {
             return;
         }
-        
+
         const word = wordInfo.word.toLowerCase();
         
         // 避免重复翻译同一个单词
@@ -243,6 +287,10 @@ function processMousePosition(e) {
         
     } catch (error) {
         console.error('处理鼠标位置时出错:', error);
+        // 如果是扩展上下文相关的错误，提示用户刷新
+        if (error.message && error.message.includes('Extension context invalidated')) {
+            showStatus('⚠️ 扩展需要刷新\n请按F5刷新页面', 5000);
+        }
     }
 }
 
@@ -292,7 +340,7 @@ function highlightWord(textNode, start, end) {
     }
 }
 
-// 获取翻译
+// 获取翻译 - 使用安全的消息发送
 function getTranslation(word, x, y) {
     // 检查缓存
     if (translationCache[word]) {
@@ -300,26 +348,26 @@ function getTranslation(word, x, y) {
         return;
     }
     
+    // 检查扩展上下文
+    if (!isExtensionContextValid()) {
+        showTooltip(word, '扩展需要刷新，请按F5', x, y);
+        return;
+    }
+    
     // 显示加载状态
     showTooltip(word, '翻译中...', x, y);
     
-    // 通过background.js获取翻译
-    chrome.runtime.sendMessage({
+    // 安全地发送消息给background.js
+    safeRuntimeSendMessage({
         action: 'getTranslation',
         word: word
     }, function(response) {
-        if (chrome.runtime.lastError) {
-            console.error('获取翻译失败:', chrome.runtime.lastError);
-            showTooltip(word, '翻译失败', x, y);
-            return;
-        }
-        
         if (response && response.success && response.translation) {
             const translation = response.translation;
             translationCache[word] = translation;
             showTooltip(word, translation, x, y);
         } else {
-            showTooltip(word, '翻译失败', x, y);
+            showTooltip(word, '翻译失败，请重试', x, y);
         }
     });
 }
@@ -337,7 +385,7 @@ function showTooltip(word, translation, x, y) {
             ${cleanTranslation}
         </div>
         <div style="text-align: right;">
-            <button onclick="saveCurrentWord('${word}', '${translation.replace(/'/g, '&#39;')}')" 
+            <button id="saveWordBtn" 
                     style="background: #4285f4; color: white; border: none; 
                            padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px;">
                 💾 保存单词
@@ -369,30 +417,43 @@ function showTooltip(word, translation, x, y) {
     tooltip.style.top = top + 'px';
     tooltip.style.visibility = 'visible';
     
+    // 添加保存按钮的事件监听器
+    const saveBtn = tooltip.querySelector('#saveWordBtn');
+    if (saveBtn) {
+        saveBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            saveCurrentWord(word, cleanTranslation);
+        };
+    }
+    
     // 6秒后自动隐藏
     setTimeout(() => {
         tooltip.style.display = 'none';
     }, 6000);
 }
 
-// 保存单词 - 全局函数
+// 保存单词 - 全局函数，使用安全的消息发送
 window.saveCurrentWord = function(word, translation) {
     try {
-        chrome.runtime.sendMessage({
+        // 检查扩展上下文
+        if (!isExtensionContextValid()) {
+            showStatus('⚠️ 扩展需要刷新\n请按F5刷新页面后重试', 5000);
+            return;
+        }
+        
+        safeRuntimeSendMessage({
             action: 'saveWord',
             word: word,
             translation: translation,
             source: window.location.href,
             pageTitle: document.title
         }, function(response) {
-            if (chrome.runtime.lastError) {
-                console.error('保存失败:', chrome.runtime.lastError);
-                showStatus('❌ 保存失败');
-            } else if (response && response.success) {
+            if (response && response.success) {
                 showStatus('✅ 保存成功');
                 tooltip.style.display = 'none';
             } else {
-                showStatus('❌ 保存失败');
+                showStatus('❌ 保存失败，请重试');
             }
         });
     } catch (error) {
@@ -450,22 +511,6 @@ document.addEventListener('keyup', function(e) {
             el.classList.remove('wordsaver-highlight');
         });
         lastTranslatedWord = '';
-    }
-});
-
-// 控制面板事件
-control.addEventListener('click', function(e) {
-    const toggle = e.target.closest('.wordsaver-toggle');
-    const menuItem = e.target.closest('.wordsaver-menu-item');
-    const menu = control.querySelector('.wordsaver-menu');
-    
-    if (toggle) {
-        e.stopPropagation();
-        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-    } else if (menuItem) {
-        const action = menuItem.dataset.action;
-        handleMenuAction(action);
-        menu.style.display = 'none';
     }
 });
 
@@ -529,15 +574,39 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// 消息处理
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === 'ping') {
-        sendResponse({ success: true });
-        return true;
-    }
-});
+// 消息处理 - 安全版本
+if (isExtensionContextValid()) {
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        try {
+            if (request.action === 'ping') {
+                sendResponse({ success: true });
+                return true;
+            }
+        } catch (error) {
+            console.error('处理消息时出错:', error);
+            return false;
+        }
+    });
+}
 
-// 初始化
-setTimeout(() => {
-    showStatus(`🎉 WordSaver 已启用！\n按住 ${currentShortcutKey} 键 + 悬停单词即可翻译`, 4000);
-}, 1000);
+// 安全的初始化
+function safeInitialize() {
+    try {
+        if (isExtensionContextValid()) {
+            // 发送加载通知
+            safeRuntimeSendMessage({ action: "contentScriptLoaded" });
+            
+            // 显示启用消息
+            setTimeout(() => {
+                showStatus(`🎉 WordSaver 已启用！\n按住 ${currentShortcutKey} 键 + 悬停单词即可翻译`, 4000);
+            }, 1000);
+        } else {
+            console.warn('扩展上下文无效，跳过初始化');
+        }
+    } catch (error) {
+        console.error('初始化时出错:', error);
+    }
+}
+
+// 执行安全初始化
+safeInitialize();
